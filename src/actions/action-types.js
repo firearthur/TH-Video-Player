@@ -1,0 +1,9 @@
+const actionTypes = {
+  PLAY_PAUSE: 'PLAY_PAUSE',
+  MUTE_UNMUTE: 'MUTE_UNMUTE',
+  SEEK_FORWARD: 'SEEK_FORWARD',
+  SEEK_BACKWARD: 'SEEK_BACKWARD',
+  DATA_AVAILABLE: 'DATA_AVAILABLE',
+};
+
+export default actionTypes;
