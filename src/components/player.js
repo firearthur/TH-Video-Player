@@ -4,21 +4,48 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import YouTube from 'react-native-youtube';
 import ControlsBar from './controls-bar';
+import { readySetup, setPlayerRef } from '../actions/player-actions';
 import API_KEY from './../../api-key';
 
 
 class Player extends Component {
+  // constructor(props) {
+  //   super(props);
+  //   this.myRef = React.createRef();
+  // }
+  // player = null;
   render() {
-    const { shouldPlay, isMuted } = this.props;
+    const {
+      shouldPlay, isMuted, player, onSetPlayerRef, playerLoaded,
+      onReadySetup
+    } = this.props;
     const { width } = Dimensions.get('window');
-
+    // console.warn(YouTube.duration());
     return (
-      <View style={styles.container}>
+      <View style={styles.container} >
         <YouTube
+          // ref={this.myRef}
+          ref={(playerRef) => { !playerLoaded && onSetPlayerRef(playerRef);
+          }}
+          // onReady={
+          //   e => (
+          //     onSetPlayerRef(this.myRef)
+          //   )
+          // }
+
+          // onReady={
+          //   e => ( !playerLoaded &&
+          //     onSetPlayerRef(this.myRef)
+          //   )
+          // }
+          onReady={e => onReadySetup()}
+          resumePlayAndroid={false}
+          controls={0}
           apiKey={API_KEY}
           videoId="3NhHqPA8nIs" // The YouTube video ID
           play={shouldPlay}
-          
+          // onProgress={()=>{console.warn('I was called ')}}
+
           // fullscreen // control whether the video should play in fullscreen or inline
           // loop // control whether the video should loop when ended
 
@@ -38,7 +65,7 @@ class Player extends Component {
           shouldPlay={shouldPlay}
           isMuted={isMuted}
         /> */}
-        <ControlsBar />
+        <ControlsBar player={player ? player : null} />
       </View>
     );
   }
@@ -60,9 +87,37 @@ Player.propTypes = {
   isMuted: PropTypes.bool.isRequired,
 };
 
-const mapStateToProps = state => ({
-  shouldPlay: state.controlBarReducer.shouldPlay,
-  isMuted: state.controlBarReducer.isMuted,
+// const mapStateToProps = state => ({
+//   shouldPlay: state.controlBarReducer.shouldPlay,
+//   isMuted: state.controlBarReducer.isMuted,
+//   player: state.playerReducer.player,
+// });
+
+const mapStateToProps = (state) => {
+  // const seen = [];
+  // console.warn('state ', JSON.stringify(state, (key, val) => {
+  //   if (val != null && typeof val === 'object') {
+  //     if (seen.indexOf(val) >= 0) {
+  //       return;
+  //     }
+  //     seen.push(val);
+  //   }
+  //   return val;
+  // }, 2));
+
+
+  return {
+    shouldPlay: state.controlBarReducer.shouldPlay,
+    isMuted: state.controlBarReducer.isMuted,
+    player: state.playerReducer.player,
+    playerLoaded: state.playerReducer.playerLoaded,
+  };
+};
+
+const mapDispatchToProps = dispatch => ({
+  onReadySetup: () => dispatch(readySetup()),
+  onSetPlayerRef: playerRef => dispatch(setPlayerRef(playerRef)),
 });
 
-export default connect(mapStateToProps)(Player);
+
+export default connect(mapStateToProps, mapDispatchToProps)(Player);
