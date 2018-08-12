@@ -4,25 +4,12 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import YouTube from 'react-native-youtube';
 import ControlsBar from './controls-bar';
-import { lifecycle, compose } from 'recompose';
-import {
-  readySetup,
-  setPlayerRef,
-  setCurrentTime
-} from '../actions/player-actions';
+import { readySetup, setCurrentTime } from '../actions/player-actions';
 import API_KEY from './../../api-key';
 
 class Player extends Component {
   render() {
-    const {
-      duration,
-      shouldPlay,
-      player,
-      onSetPlayerRef,
-      onCurrentTime,
-      playerLoaded,
-      onReadySetup
-    } = this.props;
+    const { shouldPlay, onCurrentTime, onReadySetup } = this.props;
 
     return (
       <View style={styles.container}>
@@ -33,7 +20,7 @@ class Player extends Component {
           onReady={() => {
             this.myRef
               .duration()
-              .then(duration => onReadySetup(duration))
+              .then(duration => onReadySetup(duration, this.myRef))
               .catch(error => console.warn(error));
 
             const intervalID = setInterval(() => {
@@ -72,52 +59,58 @@ const styles = StyleSheet.create({
 });
 
 Player.propTypes = {
-  shouldPlay: PropTypes.bool.isRequired
+  shouldPlay: PropTypes.bool.isRequired,
+  onCurrentTime: PropTypes.func.isRequired,
+  onReadySetup: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => {
-  // const seen = [];
-  // console.warn('state ', JSON.stringify(state, (key, val) => {
-  //   if (val != null && typeof val === 'object') {
-  //     if (seen.indexOf(val) >= 0) {
-  //       return;
-  //     }
-  //     seen.push(val);
-  //   }
-  //   return val;
-  // }, 2));
-
-  return {
-    shouldPlay: state.controlBarReducer.shouldPlay,
-    playerLoaded: state.playerReducer.playerLoaded,
-    duration: state.playerReducer.duration
-  };
-};
+const mapStateToProps = state => ({
+  shouldPlay: state.controlBarReducer.shouldPlay
+});
 
 const mapDispatchToProps = dispatch => ({
-  onReadySetup: duration => {
-    dispatch(readySetup(duration));
+  onReadySetup: (duration, playerRef) => {
+    // what happens in the following is that I'm passing a copy of both seekFor and
+    // seekBack with closure on the ref of player to be kep in redux state
+    // then it can be invoked from the controls bar sperately
+    dispatch(
+      readySetup(
+        duration,
+        seekForwardFactory(playerRef),
+        seekBackwardFactory(playerRef)
+      )
+    );
   },
   onCurrentTime: (currentTime, intervalID) => {
     dispatch(setCurrentTime(currentTime, intervalID));
-  },
-  onSetPlayerRef: playerRef => dispatch(setPlayerRef(playerRef))
+  }
 });
 
-// const withTest = lifecycle({
-//   componentDidMount() {
-//     // console.warn('hi', JSON.stringify(this, null, 2));
-//   }
-// });
 export default connect(
   mapStateToProps,
   mapDispatchToProps
 )(Player);
 
-// export default compose(
-//   withTest,
-//   connect(
-//     mapStateToProps,
-//     mapDispatchToProps
-//   )
-// )(Player);
+// Factories with currying
+
+const seekBackwardFactory = playerRef => (currentTime, numOfSecs) => {
+  // if the seek is less than zero seek to beginning
+  // otherwise seek normally
+  const seekToSeconds =
+    currentTime - numOfSecs < 0 ? 0 : numOfSecs - currentTime;
+  playerRef.seekTo(seekToSeconds);
+};
+
+const seekForwardFactory = playerRef => (
+  currentTime,
+  videoDuration,
+  numOfSecs
+) => {
+  // if the seek is over the duration seek to duration
+  // otherwise seek normally
+  const seekToSeconds =
+    videoDuration - (currentTime + numOfSecs) < 0
+      ? videoDuration
+      : currentTime + numOfSecs;
+  playerRef.seekTo(seekToSeconds);
+};

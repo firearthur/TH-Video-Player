@@ -1,21 +1,15 @@
 import actions from '../actions/action-types';
 
 const defaultState = {
-  player: null,
-  playerLoaded: false,
-  playerReady: false,
-  duration: 0
+  currentTime: 0,
+  duration: 0,
+  intervalID: 0,
+  seekForward: null,
+  seekBackward: null
 };
 
 const playerReducer = (state = defaultState, { type, payload }) => {
   switch (type) {
-    case actions.SET_PLAYER_REF:
-      return { ...state, player: payload, playerLoaded: true };
-    // case actions.SET_PLAYER_REF:
-    //   // mutating on puropse to prevent infinity re render and use only one ref
-    //   state.player = payload;
-    //   // state.player = Object.assign(state.player, payload);
-    //   return state;
     case actions.SET_CURRENT_TIME:
       return {
         ...state,
@@ -23,8 +17,12 @@ const playerReducer = (state = defaultState, { type, payload }) => {
         intervalID: payload.intervalID
       };
     case actions.READY_SETUP:
-      // time middle ware happens
-      return { ...state, playerReady: true, duration: payload };
+      return {
+        ...state,
+        duration: payload.duration,
+        seekForward: payload.seekForward,
+        seekBackward: payload.seekBackward
+      };
     default:
       return state;
   }

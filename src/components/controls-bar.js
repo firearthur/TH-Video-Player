@@ -4,7 +4,6 @@ import {
   View,
   TouchableOpacity,
   Text,
-  Platform,
   Dimensions
 } from 'react-native';
 import PropTypes from 'prop-types';
@@ -20,11 +19,10 @@ momentDuration(moment);
 const ControlsBar = ({
   onPlayAndPause,
   shouldPlay,
-  playerReady,
-  onTimeStart,
   currentTime,
   duration,
-  tInterval
+  seekForward,
+  seekBackward
 }) => {
   return (
     <View style={styles.controlBar}>
@@ -48,11 +46,14 @@ const ControlsBar = ({
 
       <View style={styles.controlsRow}>
         <TouchableOpacity
-          onPress={() => {
-            onPlayAndPause(shouldPlay);
-          }}
+          onPress={() => seekBackward && seekBackward(currentTime, 15)}
         >
-          <Text>{shouldPlay ? 'Pause' : 'Play'}</Text>
+          <Text>15 Sec back</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => seekForward && seekForward(currentTime, duration, 15)}
+        >
+          <Text>15 Sec forward</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -77,15 +78,19 @@ const styles = StyleSheet.create({
 
 ControlsBar.propTypes = {
   shouldPlay: PropTypes.bool.isRequired,
-  onPlayAndPause: PropTypes.func.isRequired
+  currentTime: PropTypes.number.isRequired,
+  duration: PropTypes.number.isRequired,
+  onPlayAndPause: PropTypes.func.isRequired,
+  seekForward: PropTypes.func.isRequired,
+  seekBackward: PropTypes.func.isRequired
 };
 
 const mapStateToProps = state => ({
   shouldPlay: state.controlBarReducer.shouldPlay,
   currentTime: state.playerReducer.currentTime,
-  tInterval: state.controlBarReducer.tInterval,
-  playerReady: state.playerReducer.playerReady,
-  duration: state.playerReducer.duration
+  duration: state.playerReducer.duration,
+  seekForward: state.playerReducer.seekForward,
+  seekBackward: state.playerReducer.seekBackward
 });
 
 const mapDispatchToProps = dispatch => ({
