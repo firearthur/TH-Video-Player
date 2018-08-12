@@ -1,6 +1,11 @@
 import actions from '../actions/action-types';
 
-const defaultState = { player: null, playerLoaded: false, playerReady: false };
+const defaultState = {
+  player: null,
+  playerLoaded: false,
+  playerReady: false,
+  duration: 0
+};
 
 const playerReducer = (state = defaultState, { type, payload }) => {
   switch (type) {
@@ -11,9 +16,15 @@ const playerReducer = (state = defaultState, { type, payload }) => {
     //   state.player = payload;
     //   // state.player = Object.assign(state.player, payload);
     //   return state;
+    case actions.SET_CURRENT_TIME:
+      return {
+        ...state,
+        currentTime: payload.currentTime,
+        intervalID: payload.intervalID
+      };
     case actions.READY_SETUP:
       // time middle ware happens
-      return { ...state, playerReady: true };
+      return { ...state, playerReady: true, duration: payload };
     default:
       return state;
   }

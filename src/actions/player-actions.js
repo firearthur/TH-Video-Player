@@ -1,11 +1,16 @@
 export const readySetup = payload => ({
   type: 'READY_SETUP',
-  payload,
+  payload
 });
 
 export const setPlayerRef = payload => ({
   type: 'SET_PLAYER_REF',
-  payload,
+  payload
+});
+
+export const setCurrentTime = (currentTime, intervalID) => ({
+  type: 'SET_CURRENT_TIME',
+  payload: { currentTime, intervalID }
 });
 
 // export default savePlayerRef;
