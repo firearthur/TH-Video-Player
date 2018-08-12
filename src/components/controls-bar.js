@@ -28,38 +28,33 @@ const ControlsBar = ({
 }) => {
   return (
     <View style={styles.controlBar}>
-      <TouchableOpacity
-        onPress={() => {
-          onPlayAndPause(shouldPlay);
-        }}
-      >
-        <Text>{shouldPlay ? 'Pause' : 'Play'}</Text>
-      </TouchableOpacity>
-      {Platform.OS !== 'android' ? (
-        <Text>This section is Android only</Text>
-      ) : (
-        <View style={styles.progressBar}>
-          <Text>{moment.duration(currentTime, 'seconds').format('mm:ss')}</Text>
+      <View style={styles.controlsRow}>
+        <TouchableOpacity
+          onPress={() => {
+            onPlayAndPause(shouldPlay);
+          }}
+        >
+          <Text>{shouldPlay ? 'Pause' : 'Play'}</Text>
+        </TouchableOpacity>
 
-          <Bar
-            progress={
-              isNaN(currentTime / duration) ? 0 : currentTime / duration
-            }
-            width={200}
-          />
-          <Text>{moment.duration(duration, 'seconds').format('mm:ss')}</Text>
+        <Text>{moment.duration(currentTime, 'seconds').format('mm:ss')}</Text>
 
-          {/* <Text>{moment.duration(currentTime, 'seconds').format('mm:ss')}</Text>
+        <Bar
+          progress={isNaN(currentTime / duration) ? 0 : currentTime / duration}
+          width={200}
+        />
+        <Text>{moment.duration(duration, 'seconds').format('mm:ss')}</Text>
+      </View>
 
-          <Bar
-            progress={
-              isNaN(currentTime / duration) ? 0 : currentTime / duration
-            }
-            width={200}
-          />
-          <Text>{moment.duration(duration, 'seconds').format('mm:ss')}</Text> */}
-        </View>
-      )}
+      <View style={styles.controlsRow}>
+        <TouchableOpacity
+          onPress={() => {
+            onPlayAndPause(shouldPlay);
+          }}
+        >
+          <Text>{shouldPlay ? 'Pause' : 'Play'}</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -68,16 +63,15 @@ const styles = StyleSheet.create({
   controlBar: {
     width: Dimensions.get('window').width,
     height: 90,
-    flexWrap: 'wrap',
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
+    justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.5)'
   },
-  progressBar: {
+  controlsRow: {
+    minWidth: Dimensions.get('window').width,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'space-evenly'
   }
 });
 
