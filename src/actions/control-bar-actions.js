@@ -1,9 +1,6 @@
-export const playPause = payload => ({
+const playPause = payload => ({
   type: 'PLAY_PAUSE',
-  payload,
+  payload
 });
 
-export const muteUnmute = payload => ({
-  type: 'MUTE_UNMUTE',
-  payload,
-});
+export default playPause;

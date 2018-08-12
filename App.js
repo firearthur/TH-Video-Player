@@ -10,8 +10,7 @@ import { Provider } from 'react-redux';
 import store from './src/store';
 import Player from './src/components/player';
 
-type Props = {};
-export default class App extends Component<Props> {
+export default class App extends Component {
   render() {
     return (
       <Provider store={store}>

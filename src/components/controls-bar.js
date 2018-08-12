@@ -1,57 +1,104 @@
-import React, { Component } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import React from 'react';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Text,
+  Dimensions
+} from 'react-native';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { playPause, muteUnmute } from '../actions/control-bar-actions';
+import moment from 'moment';
+import momentDuration from 'moment-duration-format';
+import { Bar } from 'react-native-progress';
+import playPause from '../actions/control-bar-actions';
 
+// setup the moment duration plugin
+momentDuration(moment);
 
-class ControlsBar extends Component {
-  render() {
-    const {
-      onPlayAndPause, shouldPlay, isMuted, onMuteVolume,
-    } = this.props;
-    return (
-      <View style={styles.controlBar} >
-        <TouchableOpacity
-          onPress={() => onPlayAndPause(shouldPlay)}
-        >
-          <Text style={{color:'white'}}>{shouldPlay ? 'Pause' : 'Play'}</Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity
-          name={isMuted ? 'volume-mute' : 'volume-up'}
-          onPress={() => onMuteVolume(isMuted)}
-        /> */}
-      </View>
-    );
-  }
-}
+const ControlsBar = ({
+  onPlayAndPause,
+  shouldPlay,
+  currentTime,
+  duration,
+  seekForward,
+  seekBackward
+}) => (
+  <View style={styles.controlBar}>
+    <View style={styles.controlsRow}>
+      <TouchableOpacity
+        onPress={() => {
+          onPlayAndPause(shouldPlay);
+        }}
+      >
+        <Text>{shouldPlay ? 'Pause' : 'Play'}</Text>
+      </TouchableOpacity>
+
+      <Text>{moment.duration(currentTime, 'seconds').format('mm:ss')}</Text>
+
+      <Bar
+        progress={isNaN(currentTime / duration) ? 0 : currentTime / duration}
+        width={200}
+      />
+      <Text>{moment.duration(duration, 'seconds').format('mm:ss')}</Text>
+    </View>
+
+    <View style={styles.controlsRow}>
+      <TouchableOpacity
+        // you can change the amount of seconds to seek
+        onPress={() => seekBackward && seekBackward(currentTime, 15)}
+      >
+        <Text>15 Sec back</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => seekForward && seekForward(currentTime, duration, 15)}
+      >
+        <Text>15 Sec forward</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+);
 
 const styles = StyleSheet.create({
   controlBar: {
-    height: 45,
+    width: Dimensions.get('window').width,
+    height: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  controlsRow: {
+    minWidth: Dimensions.get('window').width,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
+    justifyContent: 'space-evenly'
+  }
 });
 
 ControlsBar.propTypes = {
   shouldPlay: PropTypes.bool.isRequired,
-  isMuted: PropTypes.bool.isRequired,
+  currentTime: PropTypes.number.isRequired,
+  duration: PropTypes.number.isRequired,
   onPlayAndPause: PropTypes.func.isRequired,
-  onMuteVolume: PropTypes.func.isRequired,
+  seekForward: PropTypes.func,
+  seekBackward: PropTypes.func
 };
 
 const mapStateToProps = state => ({
   shouldPlay: state.controlBarReducer.shouldPlay,
-  isMuted: state.controlBarReducer.isMuted,
+  currentTime: state.playerReducer.currentTime,
+  duration: state.playerReducer.duration,
+  seekForward: state.playerReducer.seekForward,
+  seekBackward: state.playerReducer.seekBackward
 });
 
 const mapDispatchToProps = dispatch => ({
-  onPlayAndPause: shouldPlayStatus => dispatch(playPause(shouldPlayStatus)),
-  onMuteVolume: isMuteStatus => dispatch(muteUnmute(isMuteStatus)),
+  onPlayAndPause: shouldPlayStatus => {
+    dispatch(playPause(shouldPlayStatus));
+  }
 });
 
-
-export default connect(mapStateToProps, mapDispatchToProps)(ControlsBar);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(ControlsBar);
