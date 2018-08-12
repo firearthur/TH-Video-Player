@@ -15,16 +15,19 @@ class Player extends Component {
       <View style={styles.container}>
         <YouTube
           ref={component => {
-            this.myRef = component;
+            // the only way you have access to the apis is through
+            // the ref
+            this.playerRef = component;
           }}
           onReady={() => {
-            this.myRef
+            this.playerRef
               .duration()
-              .then(duration => onReadySetup(duration, this.myRef))
+              .then(duration => onReadySetup(duration, this.playerRef))
               .catch(error => console.warn(error));
-
+            // Start an interval to keep updating the current time
+            // on the UI
             const intervalID = setInterval(() => {
-              this.myRef
+              this.playerRef
                 .currentTime()
                 .then(currentTime => onCurrentTime(currentTime, intervalID))
                 .catch(error => console.warn(error));
@@ -92,12 +95,11 @@ export default connect(
 )(Player);
 
 // Factories with currying
-
 const seekBackwardFactory = playerRef => (currentTime, numOfSecs) => {
   // if the seek is less than zero seek to beginning
   // otherwise seek normally
   const seekToSeconds =
-    currentTime - numOfSecs < 0 ? 0 : numOfSecs - currentTime;
+    currentTime - numOfSecs < 0 ? 0 : currentTime - numOfSecs;
   playerRef.seekTo(seekToSeconds);
 };
 
