@@ -23,4 +23,4 @@
 
 **Note:** 
 * If you have any issues with the setup of your environment along the way you should check out this [page](https://facebook.github.io/react-native/docs/getting-started.html). Make sure you go to "building projects with react native" tab and find your setup there. 
-* Some features are only supported by Android. 
+* Some features are only supported by Android.
